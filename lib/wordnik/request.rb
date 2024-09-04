@@ -10,7 +10,7 @@ module Wordnik
     include ActiveModel::Conversion
     extend ActiveModel::Naming
 
-    attr_accessor :host, :path, :format, :params, :body, :http_method, :headers
+    attr_accessor :host, :path, :format, :params, :body, :http_method, :headers, :port
 
     validates_presence_of :format, :http_method
 
@@ -61,7 +61,8 @@ module Wordnik
         :scheme => Wordnik.configuration.scheme,
         :host => Wordnik.configuration.host,
         :path => self.interpreted_path,
-        :query => self.query_string.sub(/\?/, '')
+        :query => self.query_string.sub(/\?/, ''),
+        :port => 443,
       ).to_s
 
       # Drop trailing question mark, if present
@@ -92,7 +93,7 @@ module Wordnik
 
       p = p.sub("{format}", self.format.to_s)
 
-      URI.encode [Wordnik.configuration.base_path, p].join("/").gsub(/\/+/, '/')
+      URI::Parser.new.escape [Wordnik.configuration.base_path, p].join("/").gsub(/\/+/, '/')
     end
 
     # Massage the request body into a state of readiness
